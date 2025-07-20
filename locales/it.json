@@ -1,0 +1,55 @@
+{
+  "change-language": "Cambia lingua",
+  "welcome": "Benvenuto nella mia app",
+  "name-text": "Mi chiamo Mudabir Kowsar Hundai",
+  "frontpage": {
+    "title": "Benvenuto nel futuro",
+    "subtitle": "Pulito. Semplice. Ispirato al vetro."
+  },
+  "login": {
+    "title": "Accesso",
+    "subtitle": "Per favore, accedi per continuare",
+    "email": "Email",
+    "password": "Password",
+    "forgot": "Password dimenticata?",
+    "button": "Accedi",
+    "no-account": "Nessun account?",
+    "signup": "Registrati",
+    "error-empty": "Inserisci email e password",
+    "error-invalid": "Errore di accesso, email o password non valide"
+  },
+  "signup": {
+    "title": "Registrati",
+    "first-name": "Nome",
+    "last-name": "Cognome",
+    "email": "Email",
+    "password": "Password",
+    "confirm-password": "Conferma password",
+    "button": "Crea",
+    "have-account": "Hai già un account?",
+    "login": "Accedi",
+    "error-fill": "Si prega di compilare tutti i campi.",
+    "error-match": "Le password non corrispondono.",
+    "error-failed": "Registrazione fallita.",
+    "error-network": "Errore di rete.",
+    "select-language": "Seleziona lingua",
+    "cancel": "Annulla"
+  },
+  "drawer": {
+    "home": "Home",
+    "users": "Utenti",
+    "todo": "Da fare",
+    "crud": "CRUD",
+    "changeLanguage": "Cambia lingua",
+    "logout": "Disconnetti"
+  },
+  "navigation": {
+    "addUser": "Aggiungi utente",
+    "userDetail": "Dettaglio utente",
+    "updateUser": "Aggiorna utente",
+    "showDetail": "Mostra dettagli",
+    "login": "Accesso",
+    "signup": "Registrati",
+    "forgotPassword": "Password dimenticata?"
+  }
+}

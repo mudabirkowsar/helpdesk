@@ -7,13 +7,13 @@ import {
     StyleSheet,
     KeyboardAvoidingView,
     Platform,
+    Modal,
+    FlatList
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import EyeIcon from 'react-native-vector-icons/Feather';
-
-const BASE_URL = 'https://mobile.faveodemo.com/mudabir/public';
+import { LoginUser } from '../helper/LocalStorage';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
@@ -21,42 +21,38 @@ export default function LoginScreen({ navigation }) {
     const [showPassword, setShowPassword] = useState(false);
     const [showError, setShowError] = useState(false);
     const [errMessage, setErrMessage] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
 
-    const loginUser = async (email, password) => {
-        try {
-            const url = `${BASE_URL}/v3/api/login`;
-            const response = await axios.post(url, null, {
-                params: {
-                    email,
-                    password,
-                },
-            });
+    const { t, i18n } = useTranslation();
 
-            const token = response.data.data.token;
-            await AsyncStorage.setItem('auth_token', token);
-            return response.data;
-        } catch (error) {
-            console.log(error);
-            throw error;
-        }
-    };
+    const LANGUAGES = [
+        { code: 'en', label: 'English' },
+        { code: 'hi', label: 'हिन्दी' },
+        { code: 'fr', label: 'Français' },
+        { code: 'ar', label: 'العربية' },
+        { code: 'it', label: 'Italiano' },
+        { code: 'ja', label: '日本語' },
+        { code: 'ru', label: 'Русский' },
+        { code: 'sv', label: 'Svenska' },
+        { code: 'ur', label: 'اردو' },
+    ];
 
     const handleLogin = async () => {
         if (!email || !password) {
             setShowError(true);
-            setErrMessage('Please fill in both fields.');
+            setErrMessage(t("login.error-empty"));
             return;
         }
 
         try {
-            await loginUser(email, password);
+            const response = await LoginUser(email, password);
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'Drawer' }],
             });
         } catch (error) {
             setShowError(true);
-            setErrMessage('Invalid email or password.');
+            setErrMessage(t("login.error-invalid"));
         }
 
         setTimeout(() => {
@@ -71,18 +67,28 @@ export default function LoginScreen({ navigation }) {
         });
     };
 
+    const selectLanguage = (code) => {
+        i18n.changeLanguage(code);
+        setModalVisible(false);
+    };
+ 
     return (
         <KeyboardAvoidingView
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-            <Text style={styles.heading}>Welcome Back 👋</Text>
-            <Text style={styles.subheading}>Login to continue</Text>
+            {/* Top Right Language Button */}
+            <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.languageButton}>
+                <Text style={styles.languageButtonText}>🌐</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.heading}>{t("login.title")} 👋</Text>
+            <Text style={styles.subheading}>{t("login.subtitle")}</Text>
 
             <View style={styles.inputContainer}>
                 <Icon name="email" size={22} color="#888" style={styles.icon} />
                 <TextInput
-                    placeholder="Email"
+                    placeholder={t("login.email")}
                     value={email}
                     onChangeText={setEmail}
                     style={styles.input}
@@ -95,7 +101,7 @@ export default function LoginScreen({ navigation }) {
             <View style={styles.inputContainer}>
                 <Icon name="lock" size={22} color="#888" style={styles.icon} />
                 <TextInput
-                    placeholder="Password"
+                    placeholder={t("login.password")}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
@@ -119,18 +125,59 @@ export default function LoginScreen({ navigation }) {
             )}
 
             <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
-                <Text style={styles.forgotText}>Forgot Password?</Text>
+                <Text style={styles.forgotText}>{t("login.forgot")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Login</Text>
+                <Text style={styles.buttonText}>{t("login.button")}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={openSignupScreen}>
                 <Text style={styles.signupText}>
-                    Don't have an account? <Text style={styles.signupLink}>Sign Up</Text>
+                    {t("login.no-account")} <Text style={styles.signupLink}>{t("login.signup")}</Text>
                 </Text>
             </TouchableOpacity>
+
+            {/* Language Selection Modal */}
+            <Modal
+                visible={modalVisible}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>🌐 Select Language</Text>
+
+                        <FlatList
+                            data={LANGUAGES}
+                            keyExtractor={(item) => item.code}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    style={[
+                                        styles.languageItem,
+                                        i18n.language === item.code && styles.selectedLanguage,
+                                    ]}
+                                    onPress={() => selectLanguage(item.code)}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.languageTextItem,
+                                            i18n.language === item.code && styles.selectedLanguageText,
+                                        ]}
+                                    >
+                                        {item.label} ({item.code.toUpperCase()})
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
+                        />
+
+                        <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelButton}>
+                            <Text style={styles.cancelText}>✖ Cancel</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </KeyboardAvoidingView>
     );
 }
@@ -141,6 +188,19 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f8fc',
         paddingHorizontal: 25,
         justifyContent: 'center',
+    },
+    languageButton: {
+        position: 'absolute',
+        top: 45,
+        right: 20,
+        zIndex: 999,
+        backgroundColor: '#fff',
+        padding: 8,
+        borderRadius: 20,
+        elevation: 4,
+    },
+    languageButtonText: {
+        fontSize: 20,
     },
     heading: {
         fontSize: 28,
@@ -221,5 +281,58 @@ const styles = StyleSheet.create({
         color: '#b71c1c',
         fontSize: 15,
         fontWeight: '500',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContainer: {
+        backgroundColor: '#ffffff',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 25,
+        paddingBottom: 35,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -3 },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        textAlign: 'center',
+        marginBottom: 20,
+        color: '#2c3e50',
+    },
+    languageItem: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        backgroundColor: '#f0f0f0',
+        marginBottom: 10,
+    },
+    languageTextItem: {
+        fontSize: 16,
+        color: '#333',
+    },
+    selectedLanguage: {
+        backgroundColor: '#4a90e2',
+    },
+    selectedLanguageText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    cancelButton: {
+        marginTop: 10,
+        alignSelf: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+    },
+    cancelText: {
+        fontSize: 15,
+        color: '#888',
+        fontWeight: '600',
     },
 });

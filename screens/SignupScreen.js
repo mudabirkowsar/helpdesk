@@ -8,10 +8,13 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
+    Modal,
+    FlatList
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import EyeIcon from 'react-native-vector-icons/Feather';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 export default function SignupScreen({ navigation }) {
     const [firstName, setFirstName] = useState('');
@@ -23,6 +26,21 @@ export default function SignupScreen({ navigation }) {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [errMessage, setErrMessage] = useState('');
     const [showError, setShowError] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+
+    const { t, i18n } = useTranslation();
+
+    const LANGUAGES = [
+        { code: 'en', label: 'English' },
+        { code: 'hi', label: 'हिन्दी' },
+        { code: 'fr', label: 'Français' },
+        { code: 'ar', label: 'العربية' },
+        { code: 'it', label: 'Italiano' },
+        { code: 'ja', label: '日本語' },
+        { code: 'ru', label: 'Русский' },
+        { code: 'sv', label: 'Svenska' },
+        { code: 'ur', label: 'اردو' },
+    ];
 
     useEffect(() => {
         if (showError) {
@@ -33,13 +51,13 @@ export default function SignupScreen({ navigation }) {
 
     const handleSignup = async () => {
         if (!firstName || !lastName || !email || !password || !confirmPassword) {
-            setErrMessage("Please fill all fields.");
+            setErrMessage(t("signup.error-fill"));
             setShowError(true);
             return;
         }
 
         if (password !== confirmPassword) {
-            setErrMessage("Passwords do not match.");
+            setErrMessage(t("signup.error-match"));
             setShowError(true);
             return;
         }
@@ -64,17 +82,22 @@ export default function SignupScreen({ navigation }) {
             if (response.status === 200) {
                 navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
             } else {
-                setErrMessage(response.data.message?.toString() || "Signup failed.");
+                setErrMessage(response.data.message?.toString() || t("signup.error-failed"));
                 setShowError(true);
             }
         } catch (error) {
             if (error.response) {
-                setErrMessage(error.response.data.message?.toString() || "Signup failed.");
+                setErrMessage(error.response.data.message?.toString() || t("signup.error-failed"));
             } else {
-                setErrMessage("Network error.");
+                setErrMessage(t("signup.error-network"));
             }
             setShowError(true);
         }
+    };
+
+    const selectLanguage = (code) => {
+        i18n.changeLanguage(code);
+        setModalVisible(false);
     };
 
     return (
@@ -83,12 +106,17 @@ export default function SignupScreen({ navigation }) {
             style={styles.container}
         >
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                <Text style={styles.heading}>Sign Up</Text>
+
+                <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.languageButton}>
+                    <Text style={styles.languageButtonText}>🌐</Text>
+                </TouchableOpacity>
+
+                <Text style={styles.heading}>{t("signup.title")}</Text>
 
                 <View style={styles.inputContainer}>
                     <Icon name="person" size={22} color="#888" style={styles.icon} />
                     <TextInput
-                        placeholder="First Name"
+                        placeholder={t("signup.first-name")}
                         style={styles.input}
                         value={firstName}
                         onChangeText={setFirstName}
@@ -99,7 +127,7 @@ export default function SignupScreen({ navigation }) {
                 <View style={styles.inputContainer}>
                     <Icon name="person-outline" size={22} color="#888" style={styles.icon} />
                     <TextInput
-                        placeholder="Last Name"
+                        placeholder={t("signup.last-name")}
                         style={styles.input}
                         value={lastName}
                         onChangeText={setLastName}
@@ -110,7 +138,7 @@ export default function SignupScreen({ navigation }) {
                 <View style={styles.inputContainer}>
                     <Icon name="email" size={22} color="#888" style={styles.icon} />
                     <TextInput
-                        placeholder="Email"
+                        placeholder={t("signup.email")}
                         style={styles.input}
                         value={email}
                         onChangeText={setEmail}
@@ -123,7 +151,7 @@ export default function SignupScreen({ navigation }) {
                 <View style={styles.inputContainer}>
                     <Icon name="lock" size={22} color="#888" style={styles.icon} />
                     <TextInput
-                        placeholder="Password"
+                        placeholder={t("signup.password")}
                         style={styles.input}
                         secureTextEntry={!showPassword}
                         value={password}
@@ -138,7 +166,7 @@ export default function SignupScreen({ navigation }) {
                 <View style={styles.inputContainer}>
                     <Icon name="lock-outline" size={22} color="#888" style={styles.icon} />
                     <TextInput
-                        placeholder="Confirm Password"
+                        placeholder={t("signup.confirm-password")}
                         style={styles.input}
                         secureTextEntry={!showConfirmPassword}
                         value={confirmPassword}
@@ -156,18 +184,57 @@ export default function SignupScreen({ navigation }) {
                     </View>
                 )}
 
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.fullButton} onPress={handleSignup}>
-                        <Text style={styles.buttonText}>Create</Text>
-                    </TouchableOpacity>
-                </View>
+                <TouchableOpacity style={styles.fullButton} onPress={handleSignup}>
+                    <Text style={styles.buttonText}>{t("signup.button")}</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                     <Text style={styles.loginText}>
-                        Already have an account? <Text style={styles.loginLink}>Login</Text>
+                        {t("signup.have-account")} <Text style={styles.loginLink}>{t("signup.login")}</Text>
                     </Text>
                 </TouchableOpacity>
             </ScrollView>
+
+            {/* Language Modal */}
+            <Modal
+                visible={modalVisible}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>🌐 {t("signup.select-language")}</Text>
+
+                        <FlatList
+                            data={LANGUAGES}
+                            keyExtractor={(item) => item.code}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    style={[
+                                        styles.languageItem,
+                                        i18n.language === item.code && styles.selectedLanguage,
+                                    ]}
+                                    onPress={() => selectLanguage(item.code)}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.languageTextItem,
+                                            i18n.language === item.code && styles.selectedLanguageText,
+                                        ]}
+                                    >
+                                        {item.label} ({item.code.toUpperCase()})
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
+                        />
+
+                        <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelButton}>
+                            <Text style={styles.cancelText}>✖ {t("signup.cancel")}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </KeyboardAvoidingView>
     );
 }
@@ -212,23 +279,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
     },
-    errContainer: {
-        backgroundColor: '#fdecea',
-        padding: 12,
-        marginVertical: 10,
-        borderRadius: 8,
-        borderLeftWidth: 5,
-        borderLeftColor: '#f44336',
-    },
-    errText: {
-        color: '#b71c1c',
-        fontSize: 15,
-        fontWeight: '500',
-    },
-    buttonContainer: {
-        marginTop: 20,
-        alignItems: 'center',
-    },
     fullButton: {
         backgroundColor: '#4a90e2',
         width: '100%',
@@ -248,12 +298,91 @@ const styles = StyleSheet.create({
     },
     loginText: {
         textAlign: 'center',
-        marginTop: 15,
+        marginTop: 20,
         fontSize: 15,
         color: '#666',
     },
     loginLink: {
         color: '#4a90e2',
+        fontWeight: '600',
+    },
+    errContainer: {
+        backgroundColor: '#fdecea',
+        padding: 12,
+        marginVertical: 10,
+        borderRadius: 8,
+        borderLeftWidth: 5,
+        borderLeftColor: '#f44336',
+    },
+    errText: {
+        color: '#b71c1c',
+        fontSize: 15,
+        fontWeight: '500',
+    },
+    languageButton: {
+        position: 'absolute',
+        top: 45,
+        right: 20,
+        zIndex: 999,
+        backgroundColor: '#fff',
+        padding: 8,
+        borderRadius: 20,
+        elevation: 4,
+    },
+    languageButtonText: {
+        fontSize: 20,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContainer: {
+        backgroundColor: '#ffffff',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 25,
+        paddingBottom: 35,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -3 },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        textAlign: 'center',
+        marginBottom: 20,
+        color: '#2c3e50',
+    },
+    languageItem: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        backgroundColor: '#f0f0f0',
+        marginBottom: 10,
+    },
+    languageTextItem: {
+        fontSize: 16,
+        color: '#333',
+    },
+    selectedLanguage: {
+        backgroundColor: '#4a90e2',
+    },
+    selectedLanguageText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    cancelButton: {
+        marginTop: 10,
+        alignSelf: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+    },
+    cancelText: {
+        fontSize: 15,
+        color: '#888',
         fontWeight: '600',
     },
 });

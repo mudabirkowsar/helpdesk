@@ -5,10 +5,15 @@ import UsersScreen from '../screens/UsersScreen'
 import LogoutScreen from '../screens/LogoutScreen'
 import TodoApp from '../screens/TodoApp'
 import CrudOp from '../screens/CrudOP'
+import ChangeLanguage from '../screens/ChangeLanguage'
+import AntDesign from 'react-native-vector-icons/AntDesign';
+
+import { useTranslation } from 'react-i18next'
 
 const Drawer = createDrawerNavigator()
 
 export default function DrawerNavigation() {
+  const { t } = useTranslation();
   return (
     <Drawer.Navigator
       screenOptions={{
@@ -17,11 +22,57 @@ export default function DrawerNavigation() {
         headerTintColor: '#ffe2db',
       }}
     >
-      <Drawer.Screen name="Home" component={HomeScreen} />
-      <Drawer.Screen name="Users" component={UsersScreen} />
-      <Drawer.Screen name ="CRUD" component={CrudOp}/>
-      <Drawer.Screen name= "Todo App" component={TodoApp}/>
-      <Drawer.Screen name="Logout" component={LogoutScreen} />
+      <Drawer.Screen name={t('drawer.home')} component={HomeScreen}
+        options={{
+          drawerLabel: t('drawer.home'),
+          drawerIcon: ({ color, size }) => (
+            <AntDesign name="home" size={size} color={color} />
+          )
+        }}
+      />
+      <Drawer.Screen name={t('drawer.users')} component={UsersScreen}
+        options={{
+          drawerLabel: t('drawer.users'),
+          drawerIcon: ({ color, size }) => (
+            <AntDesign name="user" size={size} color={color} />
+          )
+        }} />
+
+      <Drawer.Screen name={t('drawer.crud')} component={CrudOp}
+        options={{
+          drawerLabel: t('drawer.crud'),
+          drawerIcon: ({ color, size }) => (
+            <AntDesign name="edit" size={size} color={color} />
+          )
+        }}
+      />
+
+      <Drawer.Screen name={t('drawer.todo')} component={TodoApp}
+        options={{
+          drawerLabel: t('drawer.todo'),
+          drawerIcon: ({ color, size }) => (
+            <AntDesign name="checkcircleo" size={size} color={color} />
+          )
+        }}
+      />
+
+      <Drawer.Screen name={t('drawer.changeLanguage')} component={ChangeLanguage}
+        options={{
+          drawerLabel: t('drawer.changeLanguage'),
+          drawerIcon: ({ color, size }) => (
+            <AntDesign name="earth" size={size} color={color} />
+          )
+        }}
+      />
+
+      <Drawer.Screen name={t('drawer.logout')} component={LogoutScreen}
+        options={{
+          drawerLabel: t('drawer.logout'),
+          drawerIcon: ({ color, size }) => (
+            <AntDesign name="logout" size={size} color={color} />
+          )
+        }} />
+
     </Drawer.Navigator>
   )
 }

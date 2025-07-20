@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   View,
   Text,
@@ -14,7 +15,7 @@ const { height, width } = Dimensions.get("window");
 // Floating orb animation
 function FloatingOrb({ style, delay, duration, size }) {
   const anim = useRef(new Animated.Value(0)).current;
-
+  
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
@@ -32,11 +33,13 @@ function FloatingOrb({ style, delay, duration, size }) {
       ])
     ).start();
   }, []);
-
+  
   const translateY = anim.interpolate({
     inputRange: [0, 1],
     outputRange: [0, -15],
   });
+
+ 
 
   return (
     <Animated.View
@@ -56,7 +59,10 @@ function FloatingOrb({ style, delay, duration, size }) {
   );
 }
 
+
+
 export default function FrontPage() {
+   const {t} = useTranslation();
   return (
     <ImageBackground
       source={{
@@ -96,9 +102,9 @@ export default function FrontPage() {
       {/* Main content */}
       <View style={styles.glowCircle} />
       <View style={styles.glassCard}>
-        <Text style={styles.title}>Welcome to Mudabir</Text>
+        <Text style={styles.title}>{t("frontpage.title")}</Text>
         <Text style={styles.subtitle}>
-          Start your journey to smart financial planning
+          {t("frontpage.subtitle")}
         </Text>
         <View style={styles.underline} />
       </View>

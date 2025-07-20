@@ -1,0 +1,55 @@
+{
+  "change-language": "言語を変更する",
+  "welcome": "私のアプリへようこそ",
+  "name-text": "私の名前はムダビル・コウサー・フンダイです",
+  "frontpage": {
+    "title": "未来へようこそ",
+    "subtitle": "クリーン。シンプル。ガラスに触発されて。"
+  },
+  "login": {
+    "title": "ログイン",
+    "subtitle": "続行するにはログインしてください",
+    "email": "メール",
+    "password": "パスワード",
+    "forgot": "パスワードを忘れましたか？",
+    "button": "ログイン",
+    "no-account": "アカウントをお持ちでないですか？",
+    "signup": "サインアップ",
+    "error-empty": "メールとパスワードを入力してください",
+    "error-invalid": "ログインエラー、無効なメールまたはパスワード"
+  },
+  "signup": {
+  "title": "サインアップ",
+  "first-name": "名",
+  "last-name": "姓",
+  "email": "メールアドレス",
+  "password": "パスワード",
+  "confirm-password": "パスワードを確認",
+  "button": "作成する",
+  "have-account": "すでにアカウントをお持ちですか？",
+  "login": "ログイン",
+  "error-fill": "すべての項目を入力してください。",
+  "error-match": "パスワードが一致しません。",
+  "error-failed": "サインアップに失敗しました。",
+  "error-network": "ネットワークエラー。",
+  "select-language": "言語を選択",
+  "cancel": "キャンセル"
+},
+  "drawer": {
+    "home": "ホーム",
+    "users": "ユーザー",
+    "todo": "やること",
+    "crud": "CRUD",
+    "changeLanguage": "言語を変更する",
+    "logout": "ログアウト"
+  },
+  "navigation": {
+    "addUser": "ユーザーを追加",
+    "userDetail": "ユーザー詳細",
+    "updateUser": "ユーザーを更新",
+    "showDetail": "詳細を表示",
+    "login": "ログイン",
+    "signup": "サインアップ",
+    "forgotPassword": "パスワードをお忘れですか？"
+  }
+}

@@ -8,10 +8,12 @@ import UpdateUserInCrud from '../screens/otherpages/UpdateUserInCrud';
 import AddUserInCrud from '../screens/otherpages/AddUserInCrud';
 import SignupScreen from '../screens/SignupScreen';
 import UserDetailPageInAPI from '../screens/otherpages/UserDetailPageInAPI';
+import { useTranslation } from 'react-i18next';
 
 const Stack = createNativeStackNavigator()
 
 export default function MainNavigation() {
+  const {t} = useTranslation();
 
   const commonHeaderOptions = (title) => ({
     headerShown: true,
@@ -37,18 +39,21 @@ export default function MainNavigation() {
 
       <Stack.Screen name="Signup" component={SignupScreen} />
 
-      <Stack.Screen name="User Detail" component={ShowUserDetailInCrud} />
+      <Stack.Screen name="User Detail" component={ShowUserDetailInCrud} 
+        options={commonHeaderOptions(t("navigation.userDetail"))}
+      />
 
       <Stack.Screen name="UserDetail" component={UserDetailPageInAPI}
-        options={commonHeaderOptions("User Detail")}
+        options={commonHeaderOptions(t("navigation.userDetail"))}
       />
 
       <Stack.Screen name="UpdateUser" component={UpdateUserInCrud}
-        options={commonHeaderOptions("Update User")}
+        options={commonHeaderOptions(t("navigation.updateUser"))}
       />
-      <Stack.Screen name="Add User" component={AddUserInCrud} 
-      options={commonHeaderOptions("Add User")}/>
 
+      <Stack.Screen name="Add User"  component={AddUserInCrud} 
+      options={commonHeaderOptions(t("navigation.addUser"))}
+      />
 
     </Stack.Navigator>
 
