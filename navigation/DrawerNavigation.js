@@ -3,8 +3,8 @@ import { createDrawerNavigator } from '@react-navigation/drawer'
 import HomeScreen from '../screens/HomeScreen'
 import UsersScreen from '../screens/UsersScreen'
 import LogoutScreen from '../screens/LogoutScreen'
-import CrudOp from '../screens/CrudOP'
 import TodoApp from '../screens/TodoApp'
+import CrudOp from '../screens/CrudOP'
 
 const Drawer = createDrawerNavigator()
 

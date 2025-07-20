@@ -9,29 +9,9 @@ import {
     TextInput
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Dummy data (can replace with static array or local file if needed)
-const dummyUsers = [
-    {
-        username: "john_doe",
-        name: "John Doe",
-        imageLink: "https://placekitten.com/200/200",
-        smallDescription: "Loves coding and coffee.",
-        followers: 120,
-        following: 180
-    },
-    {
-        username: "jane_doe",
-        name: "Jane Doe",
-        imageLink: "https://placekitten.com/201/201",
-        smallDescription: "Designer and cat enthusiast.",
-        followers: 90,
-        following: 75
-    }
-];
+import { loadData } from '../helper/storage';
+import dummyUsers from "../data/userData.json";
 
 export default function CrudOp({ navigation }) {
     const [userData, setUserData] = useState([]);
@@ -72,7 +52,7 @@ export default function CrudOp({ navigation }) {
             {/* Search bar */}
             <View style={styles.searchRow}>
                 <View style={styles.container}>
-                    <Ionicons name="search" size={20} color="#555" style={styles.icon} />
+                    {/* <Ionicons name="search" size={20} color="#555" style={styles.icon} /> */}
                     <TextInput
                         style={styles.input}
                         placeholder="Search by username"
@@ -119,50 +99,6 @@ export default function CrudOp({ navigation }) {
     );
 }
 
-// AsyncStorage helpers
-const saveUser = async (key, value) => {
-    try {
-        await AsyncStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-        console.log("Error saving user:", error);
-    }
-};
-
-const loadData = async (key) => {
-    try {
-        const data = await AsyncStorage.getItem(key);
-        return data ? JSON.parse(data) : null;
-    } catch (error) {
-        console.log("Error loading user:", error);
-        return null;
-    }
-};
-
-const deleteUserByUsername = async (usernameToDelete) => {
-    try {
-        const data = await AsyncStorage.getItem('users');
-        const users = data ? JSON.parse(data) : [];
-        const updatedUsers = users.filter(user => user.username !== usernameToDelete);
-        await AsyncStorage.setItem('users', JSON.stringify(updatedUsers));
-        console.log(`User "${usernameToDelete}" deleted successfully`);
-    } catch (error) {
-        console.log("Error deleting user:", error);
-    }
-};
-
-const updateUserByUsername = async (username, updatedUser) => {
-    try {
-        const users = JSON.parse(await AsyncStorage.getItem('users')) || [];
-        const newUsers = users.map(user =>
-            user.username === username ? updatedUser : user
-        );
-        await AsyncStorage.setItem('users', JSON.stringify(newUsers));
-    } catch (error) {
-        console.error("Error updating user:", error);
-    }
-};
-
-// Styles
 const styles = StyleSheet.create({
     mainContainer: {
         padding: 20,
