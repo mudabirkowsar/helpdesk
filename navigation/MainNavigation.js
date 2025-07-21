@@ -9,6 +9,7 @@ import AddUserInCrud from '../screens/otherpages/AddUserInCrud';
 import SignupScreen from '../screens/SignupScreen';
 import UserDetailPageInAPI from '../screens/otherpages/UserDetailPageInAPI';
 import { useTranslation } from 'react-i18next';
+import TodoApp from '../screens/TodoApp';
 
 const Stack = createNativeStackNavigator()
 
@@ -39,6 +40,8 @@ export default function MainNavigation() {
 
       <Stack.Screen name="Signup" component={SignupScreen} />
 
+      <Stack.Screen name="Todo" component={TodoApp}/>
+
       <Stack.Screen name="User Detail" component={ShowUserDetailInCrud} 
         options={commonHeaderOptions(t("navigation.userDetail"))}
       />
@@ -54,6 +57,7 @@ export default function MainNavigation() {
       <Stack.Screen name="Add User"  component={AddUserInCrud} 
       options={commonHeaderOptions(t("navigation.addUser"))}
       />
+
 
     </Stack.Navigator>
 

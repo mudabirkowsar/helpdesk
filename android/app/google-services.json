@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "773921335773",
+    "project_id": "helpdesk-pushnotification",
+    "storage_bucket": "helpdesk-pushnotification.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:773921335773:android:c6824c0b98f2f06463ae34",
+        "android_client_info": {
+          "package_name": "com.helpdesk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCEYGqt0eOJrr9gZL0RTqF08ozC2MN_x4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

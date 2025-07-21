@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   View,
@@ -8,14 +8,17 @@ import {
   Dimensions,
   Platform,
   Animated,
+  Modal,
+  TouchableOpacity
 } from "react-native";
+import { PermissionsAndroid } from "react-native";
+import messaging from "@react-native-firebase/messaging";
 
 const { height, width } = Dimensions.get("window");
 
-// Floating orb animation
 function FloatingOrb({ style, delay, duration, size }) {
   const anim = useRef(new Animated.Value(0)).current;
-  
+
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
@@ -33,13 +36,11 @@ function FloatingOrb({ style, delay, duration, size }) {
       ])
     ).start();
   }, []);
-  
+
   const translateY = anim.interpolate({
     inputRange: [0, 1],
     outputRange: [0, -15],
   });
-
- 
 
   return (
     <Animated.View
@@ -59,10 +60,64 @@ function FloatingOrb({ style, delay, duration, size }) {
   );
 }
 
+export default function FrontPage({ navigation }) {
+  const { t } = useTranslation();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [notifMessage, setNotifMessage] = useState("");
 
+  const requestPermissions = async () => {
+    try {
+      const result = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+      );
+      if (result === PermissionsAndroid.RESULTS.GRANTED) {
+        requestToken();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-export default function FrontPage() {
-   const {t} = useTranslation();
+  const requestToken = async () => {
+    try {
+      await messaging().registerDeviceForRemoteMessages();
+      const token = await messaging().getToken();
+      console.log("Token", token);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    requestPermissions();
+  }, []);
+
+  // Foreground notification
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      setNotifMessage(remoteMessage.notification?.body || "You have a new message!");
+      setModalVisible(true);
+
+      // Auto-dismiss after 5 seconds
+      setTimeout(() => setModalVisible(false), 5000);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Background notification tap handling
+  useEffect(() => {
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage?.data?.screen === "User") {
+          setTimeout(() => {
+            navigation.navigate("Todo");
+          }, 1000);
+        }
+      });
+  }, []);
+
   return (
     <ImageBackground
       source={{
@@ -73,41 +128,37 @@ export default function FrontPage() {
     >
       <View style={styles.darkOverlay} />
 
-      {/* Floating orbs */}
-      <FloatingOrb
-        size={80}
-        style={{ top: height * 0.15, left: width * 0.1 }}
-        delay={0}
-        duration={4000}
-      />
-      <FloatingOrb
-        size={50}
-        style={{ top: height * 0.3, left: width * 0.7 }}
-        delay={1500}
-        duration={6000}
-      />
-      <FloatingOrb
-        size={70}
-        style={{ top: height * 0.5, left: width * 0.4 }}
-        delay={3000}
-        duration={5000}
-      />
-      <FloatingOrb
-        size={40}
-        style={{ top: height * 0.6, left: width * 0.2 }}
-        delay={1000}
-        duration={4500}
-      />
+      {/* Floating Orbs */}
+      <FloatingOrb size={80} style={{ top: height * 0.15, left: width * 0.1 }} delay={0} duration={4000} />
+      <FloatingOrb size={50} style={{ top: height * 0.3, left: width * 0.7 }} delay={1500} duration={6000} />
+      <FloatingOrb size={70} style={{ top: height * 0.5, left: width * 0.4 }} delay={3000} duration={5000} />
+      <FloatingOrb size={40} style={{ top: height * 0.6, left: width * 0.2 }} delay={1000} duration={4500} />
 
       {/* Main content */}
       <View style={styles.glowCircle} />
       <View style={styles.glassCard}>
         <Text style={styles.title}>{t("frontpage.title")}</Text>
-        <Text style={styles.subtitle}>
-          {t("frontpage.subtitle")}
-        </Text>
+        <Text style={styles.subtitle}>{t("frontpage.subtitle")}</Text>
         <View style={styles.underline} />
       </View>
+
+      {/* Custom Styled Modal */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>New Notification</Text>
+            <Text style={styles.modalMessage}>{notifMessage}</Text>
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
+              <Text style={styles.closeText}>Dismiss</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 }
@@ -174,5 +225,41 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     backgroundColor: "tomato",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBox: {
+    width: "80%",
+    backgroundColor: "#fff",
+    padding: 25,
+    borderRadius: 20,
+    alignItems: "center",
+    elevation: 10,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#333",
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  closeBtn: {
+    backgroundColor: "tomato",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  closeText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });
