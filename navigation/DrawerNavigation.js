@@ -9,6 +9,7 @@ import ChangeLanguage from '../screens/ChangeLanguage'
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import { useTranslation } from 'react-i18next'
+import ReduxMainPage from '../screens/ReduxMainPage'
 
 const Drawer = createDrawerNavigator()
 
@@ -65,6 +66,17 @@ export default function DrawerNavigation() {
         }}
       />
 
+
+      <Drawer.Screen name='Redux' component={ReduxMainPage}
+        options={{
+          headerShown: false,
+          drawerLabel: "Redux",
+          drawerIcon: ({ color, size }) => (
+            <AntDesign name="database" size={size} color={color} />
+          )
+        }}
+      />
+
       <Drawer.Screen name={t('drawer.logout')} component={LogoutScreen}
         options={{
           drawerLabel: t('drawer.logout'),
@@ -72,6 +84,7 @@ export default function DrawerNavigation() {
             <AntDesign name="logout" size={size} color={color} />
           )
         }} />
+
 
     </Drawer.Navigator>
   )

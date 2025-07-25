@@ -10,6 +10,7 @@ import SignupScreen from '../screens/SignupScreen';
 import UserDetailPageInAPI from '../screens/otherpages/UserDetailPageInAPI';
 import { useTranslation } from 'react-i18next';
 import TodoApp from '../screens/TodoApp';
+import CartProductsScreen from '../screens/CartProductsScreen';
 
 const Stack = createNativeStackNavigator()
 
@@ -41,6 +42,8 @@ export default function MainNavigation() {
       <Stack.Screen name="Signup" component={SignupScreen} />
 
       <Stack.Screen name="Todo" component={TodoApp}/>
+
+      <Stack.Screen name="CartProducts" component={CartProductsScreen}/>
 
       <Stack.Screen name="User Detail" component={ShowUserDetailInCrud} 
         options={commonHeaderOptions(t("navigation.userDetail"))}
