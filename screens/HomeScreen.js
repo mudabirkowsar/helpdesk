@@ -7,6 +7,8 @@ import {
     StyleSheet,
     TouchableOpacity,
     TextInput,
+    Pressable,
+    Image
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -136,11 +138,41 @@ const UserListScreen = () => {
     };
 
     const renderItem = ({ item }) => (
-        <TouchableOpacity onPress={() => handleCardPress(item)} style={styles.card}>
-            <Text style={styles.name}>{item.first_name} {item.last_name}</Text>
-            <Text style={styles.email}>Email: {item.email}</Text>
-            <Text style={styles.role}>Role: {item.role}</Text>
-        </TouchableOpacity>
+        // <TouchableOpacity onPress={() => handleCardPress(item)} style={styles.card}>
+        //     <Text style={styles.name}>{item.first_name} {item.last_name}</Text>
+        //     <Text style={styles.email}>Email: {item.email}</Text>
+        //     <Text style={styles.role}>Role: {item.role}</Text>
+        // </TouchableOpacity>
+
+        <Pressable
+            onPress={() => handleCardPress(item)}
+            style={({ pressed }) => [
+                styles.cardMainContainer,
+                pressed && styles.cardPressed
+            ]}
+        >
+            <View style={styles.imageAndTextView}>
+                <View style={styles.imageView}>
+                    <Image style={styles.profileImage}
+                        source={{
+                            uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsyA44JdhHChP6kGqx36BolQq4Hn7z2yGekw&s"
+                        }} />
+                </View>
+                <View>
+                    <Text style={styles.name}>{item.first_name} {item.last_name}</Text>
+                    <Text style={styles.username}>@{item.username}</Text>
+                </View>
+            </View>
+            <Text style={styles.desc}>Full Stack developer </Text>
+            <View style={styles.followersFollowing}>
+                <Text style={styles.follower}>
+                    <Text style={styles.abc}>12</Text> Followers
+                </Text>
+                <Text style={styles.following}>
+                    <Text style={styles.abc}>211</Text> Following
+                </Text>
+            </View>
+        </Pressable>
     );
 
     const renderFooter = () =>
@@ -161,7 +193,6 @@ const UserListScreen = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>All Users</Text>
 
             <TextInput
                 style={styles.searchInput}
@@ -199,14 +230,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f8f9fa',
     },
-    header: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        marginTop: 20,
-        marginBottom: 10,
-        textAlign: 'center',
-        color: '#2c3e50',
-    },
     searchInput: {
         height: 48,
         marginHorizontal: 16,
@@ -222,6 +245,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.05,
         shadowRadius: 2,
         elevation: 1,
+        marginTop: 20,
     },
     listContainer: {
         paddingHorizontal: 16,
@@ -238,25 +262,88 @@ const styles = StyleSheet.create({
         shadowRadius: 6,
         elevation: 3,
     },
-    name: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#2c3e50',
-        marginBottom: 4,
-    },
-    email: {
-        fontSize: 14,
-        color: '#555',
-        marginBottom: 2,
-    },
-    role: {
-        fontSize: 13,
-        color: '#888',
-    },
+    // name: {
+    //     fontSize: 18,
+    //     fontWeight: 'bold',
+    //     color: '#2c3e50',
+    //     marginBottom: 4,
+    // },
+    // email: {
+    //     fontSize: 14,
+    //     color: '#555',
+    //     marginBottom: 2,
+    // },
+    // role: {
+    //     fontSize: 13,
+    //     color: '#888',
+    // },
     center: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 16,
     },
+
+    name: {
+        fontSize: 23,
+        fontWeight: "bold",
+        marginBottom: 4,
+        marginTop: 5
+    },
+    username: {
+        fontSize: 16,
+        color: "#0000007e"
+    },
+    desc: {
+        fontSize: 17,
+        color: "#0000007d",
+        marginTop: 10,
+        marginLeft: 10
+    },
+    follower: {
+        fontSize: 16,
+        marginLeft: 10
+    },
+    following: {
+        fontSize: 16,
+        marginLeft: 10
+    },
+    abc: {
+        fontWeight: "bold"
+    },
+
+    cardMainContainer: {
+        width: '100%',
+        borderRadius: 20,
+        marginBottom: 10,
+        padding: 10,
+        backgroundColor: "white",
+        elevation: 1,
+        transform: [{ scale: 1 }],
+    },
+    cardPressed: {
+        opacity: 0.9,
+        transform: [{ scale: 0.98 }],
+    },
+    imageAndTextView: {
+        flexDirection: "row"
+    },
+    followersFollowing: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: "90%",
+        marginTop: 10,
+    },
+    imageView: {
+        borderRadius: 100,
+        marginRight: 10
+    },
+    profileImage: {
+        height: 90,
+        width: 90,
+        borderRadius: 100,
+        borderWidth: 3,
+        borderColor: "green"
+    },
+
 });
