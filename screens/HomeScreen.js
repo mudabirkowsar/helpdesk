@@ -137,18 +137,12 @@ const UserListScreen = () => {
     const handleCardPress = (user) => {
         navigation.navigate('UserDetail', { user });
     };
-    
-    const navigateToAddPage =  ()=> {
+
+    const navigateToAddPage = () => {
         navigation.navigate("Create User")
     }
 
     const renderItem = ({ item }) => (
-        // <TouchableOpacity onPress={() => handleCardPress(item)} style={styles.card}>
-        //     <Text style={styles.name}>{item.first_name} {item.last_name}</Text>
-        //     <Text style={styles.email}>Email: {item.email}</Text>
-        //     <Text style={styles.role}>Role: {item.role}</Text>
-        // </TouchableOpacity>
-
         <Pressable
             onPress={() => handleCardPress(item)}
             style={({ pressed }) => [
@@ -355,7 +349,7 @@ const styles = StyleSheet.create({
         borderWidth: 3,
         borderColor: "green"
     },
-    
+
     btnContainer: {
         alignItems: "flex-end"
     },

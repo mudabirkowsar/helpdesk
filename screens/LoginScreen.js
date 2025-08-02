@@ -1,32 +1,27 @@
 import React, { useState } from 'react';
 import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    KeyboardAvoidingView,
-    Platform,
-    Modal,
-    FlatList,
-    ActivityIndicator
+    View, Text, TextInput, TouchableOpacity, StyleSheet,
+    KeyboardAvoidingView, Platform, Modal, FlatList, ActivityIndicator
 } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import EyeIcon from 'react-native-vector-icons/Feather';
 import { LoginUser } from '../helper/LocalStorage';
 import { useTranslation } from 'react-i18next';
 
 export default function LoginScreen({ navigation }) {
+    const { t, i18n } = useTranslation();
+
+    // State variables
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
     const [showError, setShowError] = useState(false);
-    const [errMessage, setErrMessage] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
-    const [loading, setLoading] = useState(false); // <-- added loading state
 
-    const { t, i18n } = useTranslation();
-
+    // Supported languages
     const LANGUAGES = [
         { code: 'en', label: 'English' },
         { code: 'hi', label: 'हिन्दी' },
@@ -39,38 +34,37 @@ export default function LoginScreen({ navigation }) {
         { code: 'ur', label: 'اردو' },
     ];
 
+    // Simple email validation
+    const isValidEmail = (email) =>
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    // Handle Login button click
     const handleLogin = async () => {
+        // Basic validations
         if (!email || !password) {
-            setShowError(true);
-            setErrMessage(t("login.error-empty"));
-            return;
+            return showErrorMessage(t("login.error-empty"));
         }
 
-        setLoading(true); // Start loading
+        if (!isValidEmail(email)) {
+            return showErrorMessage("Enter a valid email");
+        }
+
+        setLoading(true);
 
         try {
-            const response = await LoginUser(email, password);
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'Drawer' }],
-            });
+            await LoginUser(email, password);
+            navigation.reset({ index: 0, routes: [{ name: 'Drawer' }] });
         } catch (error) {
-            setShowError(true);
-            setErrMessage(t("login.error-invalid"));
+            showErrorMessage(t("login.error-invalid"));
         } finally {
-            setLoading(false); // Stop loading
+            setLoading(false);
         }
-
-        setTimeout(() => {
-            setShowError(false);
-        }, 5000);
     };
 
-    const openSignupScreen = () => {
-        navigation.reset({
-            index: 0,
-            routes: [{ name: 'Signup' }],
-        });
+    const showErrorMessage = (msg) => {
+        setErrorMsg(msg);
+        setShowError(true);
+        setTimeout(() => setShowError(false), 5000);
     };
 
     const selectLanguage = (code) => {
@@ -80,16 +74,19 @@ export default function LoginScreen({ navigation }) {
 
     return (
         <KeyboardAvoidingView
-            style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={styles.container}
         >
+            {/* Language Selector Button */}
             <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.languageButton}>
                 <Text style={styles.languageButtonText}>🌐</Text>
             </TouchableOpacity>
 
+            {/* Heading */}
             <Text style={styles.heading}>{t("login.title")} 👋</Text>
             <Text style={styles.subheading}>{t("login.subtitle")}</Text>
 
+            {/* Email Input */}
             <View style={styles.inputContainer}>
                 <Icon name="email" size={22} color="#888" style={styles.icon} />
                 <TextInput
@@ -99,10 +96,11 @@ export default function LoginScreen({ navigation }) {
                     style={styles.input}
                     placeholderTextColor="#aaa"
                     keyboardType="email-address"
-                    autoCapitalize='none'
+                    autoCapitalize="none"
                 />
             </View>
 
+            {/* Password Input */}
             <View style={styles.inputContainer}>
                 <Icon name="lock" size={22} color="#888" style={styles.icon} />
                 <TextInput
@@ -114,25 +112,23 @@ export default function LoginScreen({ navigation }) {
                     placeholderTextColor="#aaa"
                 />
                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    <EyeIcon
-                        name={showPassword ? 'eye' : 'eye-off'}
-                        size={20}
-                        color="#888"
-                        style={styles.icon}
-                    />
+                    <EyeIcon name={showPassword ? 'eye' : 'eye-off'} size={20} color="#888" />
                 </TouchableOpacity>
             </View>
 
+            {/* Error Message */}
             {showError && (
                 <View style={styles.errContainer}>
-                    <Text style={styles.errText}>⚠️ {errMessage}</Text>
+                    <Text style={styles.errText}>⚠️ {errorMsg}</Text>
                 </View>
             )}
 
+            {/* Forgot Password */}
             <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
                 <Text style={styles.forgotText}>{t("login.forgot")}</Text>
             </TouchableOpacity>
 
+            {/* Login Button */}
             <TouchableOpacity
                 style={[styles.button, loading && { opacity: 0.7 }]}
                 onPress={handleLogin}
@@ -145,18 +141,15 @@ export default function LoginScreen({ navigation }) {
                 )}
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={openSignupScreen}>
+            {/* Signup Redirect */}
+            <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'Signup' }] })}>
                 <Text style={styles.signupText}>
                     {t("login.no-account")} <Text style={styles.signupLink}>{t("login.signup")}</Text>
                 </Text>
             </TouchableOpacity>
 
-            <Modal
-                visible={modalVisible}
-                transparent
-                animationType="slide"
-                onRequestClose={() => setModalVisible(false)}
-            >
+            {/* Language Modal */}
+            <Modal visible={modalVisible} transparent animationType="slide">
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContainer}>
                         <Text style={styles.modalTitle}>🌐 Select Language</Text>
@@ -182,7 +175,6 @@ export default function LoginScreen({ navigation }) {
                                 </TouchableOpacity>
                             )}
                         />
-
                         <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelButton}>
                             <Text style={styles.cancelText}>✖ Cancel</Text>
                         </TouchableOpacity>
@@ -192,6 +184,7 @@ export default function LoginScreen({ navigation }) {
         </KeyboardAvoidingView>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -345,5 +338,19 @@ const styles = StyleSheet.create({
         fontSize: 15,
         color: '#888',
         fontWeight: '600',
+    },
+    
+    errContainer: {
+        backgroundColor: '#fdecea', 
+        padding: 12, 
+        marginVertical: 10,
+        borderRadius: 8, 
+        borderLeftWidth: 5, 
+        borderLeftColor: '#f44336',
+    },
+    errText: { 
+        color: '#b71c1c', 
+        fontSize: 15, 
+        fontWeight: '500' 
     },
 });
