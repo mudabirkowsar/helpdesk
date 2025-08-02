@@ -1,265 +1,262 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  ImageBackground,
-  StyleSheet,
-  Dimensions,
-  Platform,
-  Animated,
-  Modal,
-  TouchableOpacity
-} from "react-native";
-import { PermissionsAndroid } from "react-native";
-import messaging from "@react-native-firebase/messaging";
+    View,
+    Text,
+    FlatList,
+    ActivityIndicator,
+    StyleSheet,
+    TouchableOpacity,
+    TextInput,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 
-const { height, width } = Dimensions.get("window");
+const UserListScreen = () => {
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
+    const [isSearchMode, setIsSearchMode] = useState(false);
 
-function FloatingOrb({ style, delay, duration, size }) {
-  const anim = useRef(new Animated.Value(0)).current;
+    const navigation = useNavigation();
 
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(anim, {
-          toValue: 1,
-          duration,
-          delay,
-          useNativeDriver: true,
-        }),
-        Animated.timing(anim, {
-          toValue: 0,
-          duration,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
+    const fetchUsers = async (pageNum = 1, append = false) => {
+        if (!append) setLoading(true);
+        else setIsFetchingMore(true);
 
-  const translateY = anim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -15],
-  });
+        try {
+            const token = await AsyncStorage.getItem('auth_token');
+            if (!token) {
+                console.warn('Token not found');
+                return;
+            }
 
-  return (
-    <Animated.View
-      style={[
-        {
-          position: "absolute",
-          backgroundColor: "rgba(255,255,255,0.12)",
-          borderRadius: size / 2,
-          width: size,
-          height: size,
-          opacity: 0.7,
-          transform: [{ translateY }],
-        },
-        style,
-      ]}
-    />
-  );
-}
+            const response = await axios.get(
+                'https://mobile.faveodemo.com/mudabir/public/v3/user-export-data',
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    params: {
+                        'roles[0]': 'user',
+                        'roles[1]': 'agent',
+                        'sort-order': 'desc',
+                        limit: 10,
+                        page: pageNum,
+                    },
+                }
+            );
 
-export default function FrontPage({ navigation }) {
-  const { t } = useTranslation();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [notifMessage, setNotifMessage] = useState("");
+            const fetchedUsers = response.data?.data?.data || [];
 
-  const requestPermissions = async () => {
-    try {
-      const result = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-      );
-      if (result === PermissionsAndroid.RESULTS.GRANTED) {
-        requestToken();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+            if (append) {
+                setUsers(prev => [...prev, ...fetchedUsers]);
+            } else {
+                setUsers(fetchedUsers);
+            }
 
-  const requestToken = async () => {
-    try {
-      await messaging().registerDeviceForRemoteMessages();
-      const token = await messaging().getToken();
-      console.log("Token", token);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    requestPermissions();
-  }, []);
-
-  // Foreground notification
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      setNotifMessage(remoteMessage.notification?.body || "You have a new message!");
-      setModalVisible(true);
-
-      // Auto-dismiss after 5 seconds
-      setTimeout(() => setModalVisible(false), 5000);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  // Background notification tap handling
-  useEffect(() => {
-    messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
-        if (remoteMessage?.data?.screen === "User") {
-          setTimeout(() => {
-            navigation.navigate("Todo");
-          }, 1000);
+            if (fetchedUsers.length < 10) {
+                setHasMore(false);
+            } else {
+                setHasMore(true);
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        } finally {
+            setLoading(false);
+            setIsFetchingMore(false);
         }
-      });
-  }, []);
+    };
 
-  return (
-    <ImageBackground
-      source={{
-        uri: "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-      }}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <View style={styles.darkOverlay} />
+    const fetchUserById = async (userId) => {
+        setLoading(true);
+        setIsSearchMode(true);
+        try {
+            const token = await AsyncStorage.getItem('auth_token');
+            if (!token) {
+                console.warn('Token not found');
+                return;
+            }
 
-      {/* Floating Orbs */}
-      <FloatingOrb size={80} style={{ top: height * 0.15, left: width * 0.1 }} delay={0} duration={4000} />
-      <FloatingOrb size={50} style={{ top: height * 0.3, left: width * 0.7 }} delay={1500} duration={6000} />
-      <FloatingOrb size={70} style={{ top: height * 0.5, left: width * 0.4 }} delay={3000} duration={5000} />
-      <FloatingOrb size={40} style={{ top: height * 0.6, left: width * 0.2 }} delay={1000} duration={4500} />
+            const response = await axios.get(
+                `https://mobile.faveodemo.com/mudabir/public/v3/api/get-user/view/${userId}`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
 
-      {/* Main content */}
-      <View style={styles.glowCircle} />
-      <View style={styles.glassCard}>
-        <Text style={styles.title}>{t("frontpage.title")}</Text>
-        <Text style={styles.subtitle}>{t("frontpage.subtitle")}</Text>
-        <View style={styles.underline} />
-      </View>
+            const user = response.data?.data;
+            if (user) {
+                setUsers([user]);
+                setHasMore(false);
+            } else {
+                setUsers([]);
+                setHasMore(false);
+            }
 
-      {/* Custom Styled Modal */}
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>New Notification</Text>
-            <Text style={styles.modalMessage}>{notifMessage}</Text>
-            <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeText}>Dismiss</Text>
-            </TouchableOpacity>
-          </View>
+        } catch (error) {
+            console.error('Error fetching user by ID:', error);
+            setUsers([]);
+            setHasMore(false);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    // Debounce searchQuery changes
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            if (searchQuery.trim() === '') {
+                setIsSearchMode(false);
+                setPage(1);
+                setHasMore(true);
+                fetchUsers(1, false);
+            } else {
+                fetchUserById(searchQuery.trim());
+            }
+        }, 500); // wait 500ms after last keystroke
+
+        return () => clearTimeout(delayDebounce);
+    }, [searchQuery]);
+
+    const fetchMoreUsers = () => {
+        if (isSearchMode || !hasMore || isFetchingMore || loading) return;
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchUsers(nextPage, true);
+    };
+
+    const handleCardPress = (user) => {
+        navigation.navigate('UserDetail', { user });
+    };
+
+    const renderItem = ({ item }) => (
+        <TouchableOpacity onPress={() => handleCardPress(item)} style={styles.card}>
+            <Text style={styles.name}>{item.first_name} {item.last_name}</Text>
+            <Text style={styles.email}>Email: {item.email}</Text>
+            <Text style={styles.role}>Role: {item.role}</Text>
+        </TouchableOpacity>
+    );
+
+    const renderFooter = () =>
+        isFetchingMore ? (
+            <View style={styles.center}>
+                <ActivityIndicator size="small" color="#555" />
+            </View>
+        ) : null;
+
+    if (loading && users.length === 0) {
+        return (
+            <View style={styles.center}>
+                <ActivityIndicator size="large" color="#0000ff" />
+                <Text>Loading users...</Text>
+            </View>
+        );
+    }
+
+    return (
+        <View style={styles.container}>
+            <Text style={styles.header}>All Users</Text>
+
+            <TextInput
+                style={styles.searchInput}
+                placeholder="Search by User ID"
+                placeholderTextColor="#888"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                keyboardType="numeric"
+            />
+
+            <FlatList
+                data={users}
+                keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+                renderItem={renderItem}
+                contentContainerStyle={styles.listContainer}
+                ListFooterComponent={renderFooter}
+                onEndReached={fetchMoreUsers}
+                onEndReachedThreshold={0.5}
+                ListEmptyComponent={
+                    !loading && (
+                        <View style={styles.center}>
+                            <Text>No users found</Text>
+                        </View>
+                    )
+                }
+            />
         </View>
-      </Modal>
-    </ImageBackground>
-  );
-}
+    );
+};
+
+export default UserListScreen;
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    height,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  darkOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
-  glowCircle: {
-    position: "absolute",
-    width: 320,
-    height: 320,
-    borderRadius: 160,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    top: height * 0.25,
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 40,
-    elevation: 20,
-    zIndex: 0,
-  },
-  glassCard: {
-    width: "85%",
-    paddingVertical: 30,
-    paddingHorizontal: 25,
-    backgroundColor: "rgba(255, 255, 255, 0.12)",
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    alignItems: "center",
-    zIndex: 1,
-    ...Platform.select({
-      ios: { backdropFilter: "blur(20px)" },
-    }),
-  },
-  title: {
-    color: "#fff",
-    fontSize: 28,
-    fontWeight: "700",
-    textAlign: "center",
-    marginBottom: 10,
-    letterSpacing: 1.2,
-    textShadowColor: "rgba(0,0,0,0.75)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 4,
-  },
-  subtitle: {
-    color: "#ddd",
-    fontSize: 16,
-    textAlign: "center",
-    lineHeight: 24,
-    marginBottom: 20,
-  },
-  underline: {
-    width: 60,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "tomato",
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalBox: {
-    width: "80%",
-    backgroundColor: "#fff",
-    padding: 25,
-    borderRadius: 20,
-    alignItems: "center",
-    elevation: 10,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
-  },
-  modalMessage: {
-    fontSize: 16,
-    color: "#555",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  closeBtn: {
-    backgroundColor: "tomato",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-  },
-  closeText: {
-    color: "#fff",
-    fontSize: 16,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#f8f9fa',
+    },
+    header: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginTop: 20,
+        marginBottom: 10,
+        textAlign: 'center',
+        color: '#2c3e50',
+    },
+    searchInput: {
+        height: 48,
+        marginHorizontal: 16,
+        marginBottom: 12,
+        paddingHorizontal: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        backgroundColor: '#ffffff',
+        fontSize: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
+    },
+    listContainer: {
+        paddingHorizontal: 16,
+        paddingBottom: 16,
+    },
+    card: {
+        backgroundColor: '#ffffff',
+        padding: 20,
+        marginBottom: 12,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        elevation: 3,
+    },
+    name: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#2c3e50',
+        marginBottom: 4,
+    },
+    email: {
+        fontSize: 14,
+        color: '#555',
+        marginBottom: 2,
+    },
+    role: {
+        fontSize: 13,
+        color: '#888',
+    },
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 16,
+    },
 });

@@ -5,11 +5,10 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import EyeIcon from 'react-native-vector-icons/Feather';
-import { useTranslation } from 'react-i18next';
 import { registerUser } from '../helper/LocalStorage';
+import { useTranslation } from 'react-i18next';
 
-export default function SignupScreen({ navigation }) {
-    const { t, i18n } = useTranslation();
+export default function CreateUser({ navigation }) {
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -20,20 +19,8 @@ export default function SignupScreen({ navigation }) {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [errMessage, setErrMessage] = useState('');
     const [showError, setShowError] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false);
     const [loading, setLoading] = useState(false)
 
-    const LANGUAGES = [
-        { code: 'en', label: 'English' },
-        { code: 'hi', label: 'हिन्दी' },
-        { code: 'fr', label: 'Français' },
-        { code: 'ar', label: 'العربية' },
-        { code: 'it', label: 'Italiano' },
-        { code: 'ja', label: '日本語' },
-        { code: 'ru', label: 'Русский' },
-        { code: 'sv', label: 'Svenska' },
-        { code: 'ur', label: 'اردو' },
-    ];
 
     useEffect(() => {
         if (showError) {
@@ -61,7 +48,7 @@ export default function SignupScreen({ navigation }) {
         const response = await registerUser(firstName, lastName, email, password);
 
         if (response.status === 200 || response.status === 201) {
-            navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+            navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
         } else {
             setErrMessage(response.data.message || t("signup.error-failed"));
             setShowError(true);
@@ -78,20 +65,14 @@ export default function SignupScreen({ navigation }) {
     }
 };
 
+const {t} = useTranslation();
 
-    const selectLanguage = (code) => {
-        i18n.changeLanguage(code);
-        setModalVisible(false);
-    };
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.languageButton}>
-                    <Text style={styles.languageButtonText}>🌐</Text>
-                </TouchableOpacity>
-
-                <Text style={styles.heading}>{t("signup.title")}</Text>
+                {/* <Text style={styles.heading}>{t("signup.title")}</Text> */}
+                <Text style={styles.heading} >Create New User</Text>
 
                 {[
                     {
@@ -167,41 +148,8 @@ export default function SignupScreen({ navigation }) {
                         )
                     }
                 </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                    <Text style={styles.loginText}>
-                        {t("signup.have-account")} <Text style={styles.loginLink}>{t("signup.login")}</Text>
-                    </Text>
-                </TouchableOpacity>
             </ScrollView>
 
-            {/* Language Modal */}
-            <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={() => setModalVisible(false)}>
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>🌐 {t("signup.select-language")}</Text>
-                        <FlatList
-                            data={LANGUAGES}
-                            keyExtractor={(item) => item.code}
-                            renderItem={({ item }) => (
-                                <TouchableOpacity
-                                    style={[styles.languageItem, i18n.language === item.code && styles.selectedLanguage]}
-                                    onPress={() => selectLanguage(item.code)}
-                                >
-                                    <Text
-                                        style={[styles.languageTextItem, i18n.language === item.code && styles.selectedLanguageText]}
-                                    >
-                                        {item.label} ({item.code.toUpperCase()})
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
-                        />
-                        <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelButton}>
-                            <Text style={styles.cancelText}>✖ {t("signup.cancel")}</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
         </KeyboardAvoidingView>
     );
 }

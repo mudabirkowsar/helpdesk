@@ -10,6 +10,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import { useTranslation } from 'react-i18next'
 import ReduxMainPage from '../screens/ReduxMainPage'
+import CreateUser from '../screens/CreateUser'
 
 const Drawer = createDrawerNavigator()
 
@@ -31,31 +32,31 @@ export default function DrawerNavigation() {
           )
         }}
       />
-      <Drawer.Screen name={t('drawer.users')} component={UsersScreen}
+      {/* <Drawer.Screen name={t('drawer.users')} component={UsersScreen}
         options={{
           drawerLabel: t('drawer.users'),
           drawerIcon: ({ color, size }) => (
             <AntDesign name="user" size={size} color={color} />
           )
-        }} />
+        }} /> */}
 
-      <Drawer.Screen name={t('drawer.crud')} component={CrudOp}
+      {/* <Drawer.Screen name={t('drawer.crud')} component={CrudOp}
         options={{
           drawerLabel: t('drawer.crud'),
           drawerIcon: ({ color, size }) => (
             <AntDesign name="edit" size={size} color={color} />
           )
         }}
-      />
+      /> */}
 
-      <Drawer.Screen name={t('drawer.todo')} component={TodoApp}
+      {/* <Drawer.Screen name={t('drawer.todo')} component={TodoApp}
         options={{
           drawerLabel: t('drawer.todo'),
           drawerIcon: ({ color, size }) => (
             <AntDesign name="checkcircleo" size={size} color={color} />
           )
         }}
-      />
+      /> */}
 
       <Drawer.Screen name={t('drawer.changeLanguage')} component={ChangeLanguage}
         options={{
@@ -65,6 +66,14 @@ export default function DrawerNavigation() {
           )
         }}
       />
+
+      <Drawer.Screen name='Create User' component={CreateUser}
+      options={{
+          drawerLabel: "Create New User ",
+          drawerIcon: ({ color, size }) => (
+            <AntDesign name="user" size={size} color={color} />
+          )
+        }} />
 
 
       <Drawer.Screen name='Redux' component={ReduxMainPage}
@@ -84,8 +93,7 @@ export default function DrawerNavigation() {
             <AntDesign name="logout" size={size} color={color} />
           )
         }} />
-
-
+        
     </Drawer.Navigator>
   )
 }

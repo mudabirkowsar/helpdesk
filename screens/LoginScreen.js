@@ -8,7 +8,8 @@ import {
     KeyboardAvoidingView,
     Platform,
     Modal,
-    FlatList
+    FlatList,
+    ActivityIndicator
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import EyeIcon from 'react-native-vector-icons/Feather';
@@ -22,6 +23,7 @@ export default function LoginScreen({ navigation }) {
     const [showError, setShowError] = useState(false);
     const [errMessage, setErrMessage] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
+    const [loading, setLoading] = useState(false); // <-- added loading state
 
     const { t, i18n } = useTranslation();
 
@@ -44,6 +46,8 @@ export default function LoginScreen({ navigation }) {
             return;
         }
 
+        setLoading(true); // Start loading
+
         try {
             const response = await LoginUser(email, password);
             navigation.reset({
@@ -53,6 +57,8 @@ export default function LoginScreen({ navigation }) {
         } catch (error) {
             setShowError(true);
             setErrMessage(t("login.error-invalid"));
+        } finally {
+            setLoading(false); // Stop loading
         }
 
         setTimeout(() => {
@@ -71,13 +77,12 @@ export default function LoginScreen({ navigation }) {
         i18n.changeLanguage(code);
         setModalVisible(false);
     };
- 
+
     return (
         <KeyboardAvoidingView
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-            {/* Top Right Language Button */}
             <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.languageButton}>
                 <Text style={styles.languageButtonText}>🌐</Text>
             </TouchableOpacity>
@@ -128,8 +133,16 @@ export default function LoginScreen({ navigation }) {
                 <Text style={styles.forgotText}>{t("login.forgot")}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                <Text style={styles.buttonText}>{t("login.button")}</Text>
+            <TouchableOpacity
+                style={[styles.button, loading && { opacity: 0.7 }]}
+                onPress={handleLogin}
+                disabled={loading}
+            >
+                {loading ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                    <Text style={styles.buttonText}>{t("login.button")}</Text>
+                )}
             </TouchableOpacity>
 
             <TouchableOpacity onPress={openSignupScreen}>
@@ -138,7 +151,6 @@ export default function LoginScreen({ navigation }) {
                 </Text>
             </TouchableOpacity>
 
-            {/* Language Selection Modal */}
             <Modal
                 visible={modalVisible}
                 transparent
@@ -148,7 +160,6 @@ export default function LoginScreen({ navigation }) {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContainer}>
                         <Text style={styles.modalTitle}>🌐 Select Language</Text>
-
                         <FlatList
                             data={LANGUAGES}
                             keyExtractor={(item) => item.code}

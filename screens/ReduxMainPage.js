@@ -145,7 +145,7 @@ export default function ReduxMainPage() {
             price: 25000,
             color: "Yellow",
             image: "https://i02.appmifile.com/181_operatorx_operatorx_xm/08/01/2024/8eeed46fdb1339678c0fbf6b07245413.jpg"
-        }
+        },
     ]
 
     return (

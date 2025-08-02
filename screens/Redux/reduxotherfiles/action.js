@@ -6,7 +6,7 @@ export function addToCart(item){
         type: ADD_TO_CART,
         data: item
     }
-}
+} 
 
 export function removeFromCart(item){
     return{
