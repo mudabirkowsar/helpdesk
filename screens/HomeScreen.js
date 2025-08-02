@@ -13,6 +13,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const UserListScreen = () => {
     const [users, setUsers] = useState([]);
@@ -136,6 +137,10 @@ const UserListScreen = () => {
     const handleCardPress = (user) => {
         navigation.navigate('UserDetail', { user });
     };
+    
+    const navigateToAddPage =  ()=> {
+        navigation.navigate("Create User")
+    }
 
     const renderItem = ({ item }) => (
         // <TouchableOpacity onPress={() => handleCardPress(item)} style={styles.card}>
@@ -193,6 +198,11 @@ const UserListScreen = () => {
 
     return (
         <View style={styles.container}>
+            <View style={styles.btnContainer}>
+                <Pressable style={styles.addBtn} onPress={navigateToAddPage}>
+                    <AntDesign name="adduser" color="#000" size={24} />
+                </Pressable>
+            </View>
 
             <TextInput
                 style={styles.searchInput}
@@ -344,6 +354,23 @@ const styles = StyleSheet.create({
         borderRadius: 100,
         borderWidth: 3,
         borderColor: "green"
+    },
+    
+    btnContainer: {
+        alignItems: "flex-end"
+    },
+    addBtn: {
+        width: 60,
+        height: 60,
+        borderRadius: 50,
+        padding: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#78dc78',
+        position: "absolute",
+        top: 700,
+        right: 30,
+        zIndex: 1000,
     },
 
 });
