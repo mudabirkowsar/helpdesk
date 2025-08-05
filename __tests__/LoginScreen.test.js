@@ -10,7 +10,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 describe('LoginUser', () => {
   const email = 'user@example.com';
   const password = 'password123';
-  const mockToken = 'test-token';
+  const mockToken = 'token';
 
   afterEach(() => {
     jest.clearAllMocks();

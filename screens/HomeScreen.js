@@ -5,7 +5,6 @@ import {
     FlatList,
     ActivityIndicator,
     StyleSheet,
-    TouchableOpacity,
     TextInput,
     Pressable,
     Image
@@ -14,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import userData from "../data/userData.json"; 
 
 const UserListScreen = () => {
     const [users, setUsers] = useState([]);
@@ -24,7 +24,10 @@ const UserListScreen = () => {
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [isSearchMode, setIsSearchMode] = useState(false);
 
-    const navigation = useNavigation();
+    const navigation = useNavigation(); 
+
+    const followers = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
+    const following = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
 
     const fetchUsers = async (pageNum = 1, append = false) => {
         if (!append) setLoading(true);
@@ -159,16 +162,16 @@ const UserListScreen = () => {
                 </View>
                 <View>
                     <Text style={styles.name}>{item.first_name} {item.last_name}</Text>
-                    <Text style={styles.username}>@{item.username}</Text>
+                    <Text style={styles.username}>@{item.email}</Text>
                 </View>
             </View>
             <Text style={styles.desc}>Full Stack developer </Text>
             <View style={styles.followersFollowing}>
                 <Text style={styles.follower}>
-                    <Text style={styles.abc}>12</Text> Followers
+                    <Text style={styles.abc}>{followers}</Text> Followers
                 </Text>
                 <Text style={styles.following}>
-                    <Text style={styles.abc}>211</Text> Following
+                    <Text style={styles.abc}>{following}</Text> Following
                 </Text>
             </View>
         </Pressable>

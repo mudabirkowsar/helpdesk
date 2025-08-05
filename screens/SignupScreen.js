@@ -168,33 +168,130 @@ export default function SignupScreen({ navigation }) {
 
 // Basic styling (unchanged for simplicity)
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f8fc' },
-    scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 25 },
-    heading: { fontSize: 28, fontWeight: '700', color: '#222', textAlign: 'center', marginBottom: 30 },
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f8fc'
+    },
+    scrollContent: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        padding: 25
+    },
+    heading: {
+        fontSize: 28,
+        fontWeight: '700',
+        color: '#222',
+        textAlign: 'center',
+        marginBottom: 30
+    },
     inputContainer: {
-        flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12,
-        paddingHorizontal: 15, marginBottom: 20, height: 55, shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05, shadowRadius: 3, elevation: 2,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        paddingHorizontal: 15,
+        marginBottom: 20,
+        height: 55,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 3,
+        elevation: 2,
     },
-    input: { flex: 1, fontSize: 16, color: '#333', marginLeft: 10 },
+    input: {
+        flex: 1,
+        fontSize: 16,
+        color: '#333',
+        marginLeft: 10
+
+    },
     fullButton: {
-        backgroundColor: '#4a90e2', paddingVertical: 16, borderRadius: 12,
-        alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.1, shadowRadius: 5, elevation: 3,
+        backgroundColor: '#4a90e2',
+        paddingVertical: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 3,
     },
-    buttonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
-    loginText: { textAlign: 'center', marginTop: 20, fontSize: 15, color: '#666' },
-    loginLink: { color: '#4a90e2', fontWeight: '600' },
-    errorText: { backgroundColor: '#fdecea', color: '#b71c1c', padding: 10, borderRadius: 8, marginBottom: 10 },
-    languageButton: { position: 'absolute', top: 45, right: 20, backgroundColor: '#fff', padding: 8, borderRadius: 20, elevation: 4 },
-    languageButtonText: { fontSize: 20 },
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-end' },
-    modalContainer: { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 25 },
-    modalTitle: { fontSize: 20, fontWeight: '700', textAlign: 'center', marginBottom: 20 },
-    languageItem: { paddingVertical: 12, paddingHorizontal: 16, borderRadius: 10, backgroundColor: '#f0f0f0', marginBottom: 10 },
-    languageTextItem: { fontSize: 16, color: '#333' },
-    selectedLanguage: { backgroundColor: '#4a90e2' },
-    selectedLanguageText: { color: '#fff', fontWeight: 'bold' },
-    cancelButton: { marginTop: 10, alignSelf: 'center' },
-    cancelText: { fontSize: 15, color: '#888', fontWeight: '600' },
+    buttonText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 16
+    },
+    loginText: {
+        textAlign: 'center',
+        marginTop: 20,
+        fontSize: 15,
+        color: '#666'
+    },
+    loginLink: {
+        color: '#4a90e2',
+        fontWeight: '600'
+    },
+    errorText: {
+        backgroundColor: '#fdecea',
+        color: '#b71c1c',
+        padding: 10,
+        borderRadius: 8,
+        marginBottom: 10
+    },
+    languageButton: {
+        position: 'absolute',
+        top: 45,
+        right: 20,
+        backgroundColor: '#fff',
+        padding: 8,
+        borderRadius: 20,
+        elevation: 4
+    },
+    languageButtonText: {
+        fontSize: 20
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end'
+    },
+    modalContainer: {
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 25
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        textAlign: 'center',
+        marginBottom: 20
+    },
+    languageItem: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        backgroundColor: '#f0f0f0',
+        marginBottom: 10
+    },
+    languageTextItem: {
+        fontSize: 16,
+        color: '#333'
+    },
+    selectedLanguage: {
+        backgroundColor: '#4a90e2'
+    },
+    selectedLanguageText: {
+        color: '#fff',
+        fontWeight: 'bold'
+    },
+    cancelButton: {
+        marginTop: 10,
+        alignSelf: 'center'
+    },
+    cancelText: {
+        fontSize: 15,
+        color: '#888',
+        fontWeight: '600'
+    },
 });
