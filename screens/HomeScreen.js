@@ -1,140 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import {
-    View,
-    Text,
-    FlatList,
-    ActivityIndicator,
-    StyleSheet,
-    TextInput,
-    Pressable,
-    Image
+    View, Text, FlatList, ActivityIndicator,
+    StyleSheet, TextInput, Pressable, Image
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import userData from "../data/userData.json"; 
+import { fetchUserById, fetchUsers, resetUsers } from '../services/redux/slices/userSlice';
 
 const UserListScreen = () => {
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [isFetchingMore, setIsFetchingMore] = useState(false);
-    const [isSearchMode, setIsSearchMode] = useState(false);
+    const dispatch = useDispatch();
+    const navigation = useNavigation();
+    const { list: users, loading, hasMore, page, searchQuery } = useSelector((state) => state.user);
 
-    const navigation = useNavigation(); 
+    const [searchText, setSearchText] = useState('');
 
     const followers = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
     const following = Math.floor(Math.random() * (1000 - 10 + 1)) + 10;
 
-    const fetchUsers = async (pageNum = 1, append = false) => {
-        if (!append) setLoading(true);
-        else setIsFetchingMore(true);
-
-        try {
-            const token = await AsyncStorage.getItem('auth_token');
-            if (!token) {
-                console.warn('Token not found');
-                return;
-            }
-
-            const response = await axios.get(
-                'https://mobile.faveodemo.com/mudabir/public/v3/user-export-data',
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    params: {
-                        'roles[0]': 'user',
-                        'roles[1]': 'agent',
-                        'sort-order': 'desc',
-                        limit: 10,
-                        page: pageNum,
-                    },
-                }
-            );
-
-            const fetchedUsers = response.data?.data?.data || [];
-
-            if (append) {
-                setUsers(prev => [...prev, ...fetchedUsers]);
-            } else {
-                setUsers(fetchedUsers);
-            }
-
-            if (fetchedUsers.length < 10) {
-                setHasMore(false);
-            } else {
-                setHasMore(true);
-            }
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        } finally {
-            setLoading(false);
-            setIsFetchingMore(false);
-        }
-    };
-
-    const fetchUserById = async (userId) => {
-        setLoading(true);
-        setIsSearchMode(true);
-        try {
-            const token = await AsyncStorage.getItem('auth_token');
-            if (!token) {
-                console.warn('Token not found');
-                return;
-            }
-
-            const response = await axios.get(
-                `https://mobile.faveodemo.com/mudabir/public/v3/api/get-user/view/${userId}`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-
-            const user = response.data?.data;
-            if (user) {
-                setUsers([user]);
-                setHasMore(false);
-            } else {
-                setUsers([]);
-                setHasMore(false);
-            }
-
-        } catch (error) {
-            console.error('Error fetching user by ID:', error);
-            setUsers([]);
-            setHasMore(false);
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    // Initial fetch
     useEffect(() => {
-        fetchUsers();
+        loadUsers(1);
     }, []);
 
-    // Debounce searchQuery changes
+    // Search debounce
     useEffect(() => {
-        const delayDebounce = setTimeout(() => {
-            if (searchQuery.trim() === '') {
-                setIsSearchMode(false);
-                setPage(1);
-                setHasMore(true);
-                fetchUsers(1, false);
+        const timer = setTimeout(() => {
+            if (searchText.trim() === '') {
+                dispatch(resetUsers());
+                loadUsers(1);
             } else {
-                fetchUserById(searchQuery.trim());
+                loadUserById(searchText.trim());
             }
-        }, 500); // wait 500ms after last keystroke
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchText]);
 
-        return () => clearTimeout(delayDebounce);
-    }, [searchQuery]);
+    const loadUsers = async (pageNum) => {
+        const token = await AsyncStorage.getItem('auth_token');
+        if (!token) return;
+        dispatch(fetchUsers({ token, page: pageNum }));
+    };
 
-    const fetchMoreUsers = () => {
-        if (isSearchMode || !hasMore || isFetchingMore || loading) return;
-        const nextPage = page + 1;
-        setPage(nextPage);
-        fetchUsers(nextPage, true);
+    const loadMoreUsers = async () => {
+        if (loading || !hasMore || searchQuery) return;
+        const token = await AsyncStorage.getItem('auth_token');
+        if (!token) return;
+        dispatch(fetchUsers({ token, page: page + 1, searchQuery }));
+    };
+
+    const loadUserById = async (id) => {
+        const token = await AsyncStorage.getItem('auth_token');
+        if (!token) return;
+        dispatch(fetchUserById({ token, id }));
     };
 
     const handleCardPress = (user) => {
@@ -142,8 +61,8 @@ const UserListScreen = () => {
     };
 
     const navigateToAddPage = () => {
-        navigation.navigate("Create User")
-    }
+        navigation.navigate('Create User');
+    };
 
     const renderItem = ({ item }) => (
         <Pressable
@@ -155,17 +74,19 @@ const UserListScreen = () => {
         >
             <View style={styles.imageAndTextView}>
                 <View style={styles.imageView}>
-                    <Image style={styles.profileImage}
+                    <Image
+                        style={styles.profileImage}
                         source={{
                             uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsyA44JdhHChP6kGqx36BolQq4Hn7z2yGekw&s"
-                        }} />
+                        }}
+                    />
                 </View>
                 <View>
                     <Text style={styles.name}>{item.first_name} {item.last_name}</Text>
-                    <Text style={styles.username}>@{item.email}</Text>
+                    <Text style={styles.username}>{item.email}</Text>
                 </View>
             </View>
-            <Text style={styles.desc}>Full Stack developer </Text>
+            <Text style={styles.desc}>Full Stack developer</Text>
             <View style={styles.followersFollowing}>
                 <Text style={styles.follower}>
                     <Text style={styles.abc}>{followers}</Text> Followers
@@ -178,20 +99,11 @@ const UserListScreen = () => {
     );
 
     const renderFooter = () =>
-        isFetchingMore ? (
+        loading && hasMore ? (
             <View style={styles.center}>
                 <ActivityIndicator size="small" color="#555" />
             </View>
         ) : null;
-
-    if (loading && users.length === 0) {
-        return (
-            <View style={styles.center}>
-                <ActivityIndicator size="large" color="#0000ff" />
-                <Text>Loading users...</Text>
-            </View>
-        );
-    }
 
     return (
         <View style={styles.container}>
@@ -205,8 +117,8 @@ const UserListScreen = () => {
                 style={styles.searchInput}
                 placeholder="Search by User ID"
                 placeholderTextColor="#888"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
+                value={searchText}
+                onChangeText={setSearchText}
                 keyboardType="numeric"
             />
 
@@ -216,7 +128,7 @@ const UserListScreen = () => {
                 renderItem={renderItem}
                 contentContainerStyle={styles.listContainer}
                 ListFooterComponent={renderFooter}
-                onEndReached={fetchMoreUsers}
+                onEndReached={loadMoreUsers}
                 onEndReachedThreshold={0.5}
                 ListEmptyComponent={
                     !loading && (
@@ -235,7 +147,7 @@ export default UserListScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: '#f8f9fa'
     },
     searchInput: {
         height: 48,
@@ -256,41 +168,14 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         paddingHorizontal: 16,
-        paddingBottom: 16,
+        paddingBottom: 16
     },
-    card: {
-        backgroundColor: '#ffffff',
-        padding: 20,
-        marginBottom: 12,
-        borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 3,
-    },
-    // name: {
-    //     fontSize: 18,
-    //     fontWeight: 'bold',
-    //     color: '#2c3e50',
-    //     marginBottom: 4,
-    // },
-    // email: {
-    //     fontSize: 14,
-    //     color: '#555',
-    //     marginBottom: 2,
-    // },
-    // role: {
-    //     fontSize: 13,
-    //     color: '#888',
-    // },
     center: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 16,
+        padding: 16
     },
-
     name: {
         fontSize: 23,
         fontWeight: "bold",
@@ -318,7 +203,6 @@ const styles = StyleSheet.create({
     abc: {
         fontWeight: "bold"
     },
-
     cardMainContainer: {
         width: '100%',
         borderRadius: 20,
@@ -330,7 +214,7 @@ const styles = StyleSheet.create({
     },
     cardPressed: {
         opacity: 0.9,
-        transform: [{ scale: 0.98 }],
+        transform: [{ scale: 0.98 }]
     },
     imageAndTextView: {
         flexDirection: "row"
@@ -352,7 +236,6 @@ const styles = StyleSheet.create({
         borderWidth: 3,
         borderColor: "green"
     },
-
     btnContainer: {
         alignItems: "flex-end"
     },
@@ -369,5 +252,4 @@ const styles = StyleSheet.create({
         right: 30,
         zIndex: 1000,
     },
-
 });

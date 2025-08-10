@@ -22,7 +22,7 @@ const UserDetailPageInAPI = ({ route }) => {
 
       <View style={styles.detailMainContainer}>
         <Text style={styles.name}>{user.first_name} {user.last_name}</Text>
-        <Text style={styles.username}>@{user.email}</Text>
+        <Text style={styles.username}>{user.email}</Text>
         <Text style={styles.desc}>Full Stack developer</Text>
 
         <View style={styles.followersFollowing}>

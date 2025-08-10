@@ -8,6 +8,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import EyeIcon from 'react-native-vector-icons/Feather';
 import { LoginUser } from '../helper/LocalStorage';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
+import { loginUser } from '../services/redux/slices/authSlice';
 
 export default function LoginScreen({ navigation }) {
     const { t, i18n } = useTranslation();
@@ -20,6 +22,8 @@ export default function LoginScreen({ navigation }) {
     const [errorMsg, setErrorMsg] = useState('');
     const [showError, setShowError] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
+
+    const dispatch = useDispatch()
 
     // Supported languages
     const LANGUAGES = [
@@ -39,27 +43,55 @@ export default function LoginScreen({ navigation }) {
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
     // Handle Login button click
+    // const handleLogin = async () => {
+    //     // Basic validations
+    //     if (!email || !password) {
+    //         return showErrorMessage(t("login.error-empty"));
+    //     }
+
+    //     if (!isValidEmail(email)) {
+    //         return showErrorMessage("Enter a valid email");
+    //     }
+
+    //     setLoading(true);
+
+    //     try {
+    //         // await LoginUser(email, password);
+    //         dispatch(loginUser({email, password}))
+    //         navigation.reset({ index: 0, routes: [{ name: 'Drawer' }] });
+    //     } catch (error) {
+    //         showErrorMessage(t("login.error-invalid"));
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
     const handleLogin = async () => {
-        // Basic validations
         if (!email || !password) {
             return showErrorMessage(t("login.error-empty"));
         }
-
         if (!isValidEmail(email)) {
             return showErrorMessage("Enter a valid email");
         }
 
         setLoading(true);
-
         try {
-            await LoginUser(email, password);
+            // Dispatch login and unwrap to get the actual payload or error
+            const data = await dispatch(loginUser({ email, password })).unwrap();
+
+            // ✅ Save token or user data to local storage if needed
+            // await LoginUser(data.token, data.user);
+
+            // ✅ Navigate after successful login
             navigation.reset({ index: 0, routes: [{ name: 'Drawer' }] });
-        } catch (error) {
-            showErrorMessage(t("login.error-invalid"));
+        } catch (err) {
+            // ❌ Show error from backend or fallback
+            showErrorMessage(err?.message || "Invalid email or password");
         } finally {
             setLoading(false);
         }
     };
+
 
     const showErrorMessage = (msg) => {
         setErrorMsg(msg);
@@ -339,18 +371,18 @@ const styles = StyleSheet.create({
         color: '#888',
         fontWeight: '600',
     },
-    
+
     errContainer: {
-        backgroundColor: '#fdecea', 
-        padding: 12, 
+        backgroundColor: '#fdecea',
+        padding: 12,
         marginVertical: 10,
-        borderRadius: 8, 
-        borderLeftWidth: 5, 
+        borderRadius: 8,
+        borderLeftWidth: 5,
         borderLeftColor: '#f44336',
     },
-    errText: { 
-        color: '#b71c1c', 
-        fontSize: 15, 
-        fontWeight: '500' 
+    errText: {
+        color: '#b71c1c',
+        fontSize: 15,
+        fontWeight: '500'
     },
 });
